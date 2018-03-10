@@ -1,0 +1,15 @@
+"D:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\arm\bin\armproc.dll" 
+
+"D:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\arm\bin\armjlink2.dll" 
+
+"C:\Users\Administrator\Desktop\Setting_P_Device_chart\HW1ME01538 7-13寸前壳不可见产品拆屏夹具(非标) 下位机 V04 更改IO\V03(256)\GrapetestBoard\Debug\Exe\Grape_test_Board.out" 
+
+--plugin "D:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\arm\bin\armbat.dll" 
+
+--device_macro "D:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\arm\config\debugger\ST\STM32F1xx_XL.dmac" 
+
+--flash_loader "D:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\arm\config\flashloader\ST\FlashSTM32F10xxE.board" 
+
+
+
+

@@ -1,0 +1,639 @@
+/*
+*********************************************************************************************************
+*                                     MICIRUM BOARD SUPPORT PACKAGE
+*
+*                             (c) Copyright 2007; Micrium, Inc.; Weston, FL
+*
+*               All rights reserved.  Protected by international copyright laws.
+*               Knowledge of the source code may NOT be used to develop a similar product.
+*               Please help us continue to provide the Embedded community with the finest
+*               software available.  Your honesty is greatly appreciated.
+*********************************************************************************************************
+*/
+
+/*
+*********************************************************************************************************
+*
+*                                        BOARD SUPPORT PACKAGE
+*
+*                                     ST Microelectronics STM32
+*                                              on the
+*
+*                                     Micrium uC-Eval-STM32F107
+*                                        Evaluation Board
+*
+* Filename      : bsp.h
+* Version       : V1.00
+* Programmer(s) : EHS
+*********************************************************************************************************
+*/
+
+/*
+*********************************************************************************************************
+*                                                 MODULE
+*
+* Note(s) : (1) This header file is protected from multiple pre-processor inclusion through use of the
+*               BSP present pre-processor macro definition.
+*********************************************************************************************************
+*/
+
+#ifndef  BSP_PRESENT
+#define  BSP_PRESENT
+
+
+/*
+*********************************************************************************************************
+*                                                 EXTERNS
+*********************************************************************************************************
+*/
+
+#ifdef   BSP_MODULE
+#define  BSP_EXT
+#else
+#define  BSP_EXT  extern
+#endif
+
+
+/*
+*********************************************************************************************************
+*                                              INCLUDE FILES
+*********************************************************************************************************
+*/
+
+#include  <stdarg.h>
+#include  <stdio.h>
+
+#include  <cpu.h>
+#include  <cpu_core.h>
+
+#include  <lib_ascii.h>
+#include  <lib_def.h>
+#include  <lib_mem.h>
+#include  <lib_str.h>
+
+#include "stm32f10x.h"
+
+#include  <app_cfg.h>
+
+#include  <bsp_os.h>
+#include  <bsp_ser.h>
+
+#include <sys.h>
+#include <app.h>
+
+#include <bsp_iicbusDrive.h>
+#include <bsp_keyscan.h>
+#include <modbus.h>
+#include <bsp_motioncontrol.h>
+#include <bsp_Controltargetconf.h>
+#include "bsp_spi.h"
+#include "bsp_spi_AD1248.h"
+#include "modus_Controltargetconf.h"
+#include "app_ser_cmd.h"
+#include "app_action_ctl.h"
+
+/*
+*********************************************************************************************************
+*                                               I/O Setting
+*********************************************************************************************************
+*/
+//输出
+#define   BSP_POUT1_01       PEout(6)  
+#define   BSP_POUT1_02       PCout(14)
+#define   BSP_POUT1_03       PCout(0)
+#define   BSP_POUT1_04       PCout(2)
+#define   BSP_POUT1_05       PAout(4)
+#define   BSP_POUT1_06       PAout(7)
+#define   BSP_POUT1_07       PAout(5)
+#define   BSP_POUT1_08       PCout(3)
+
+#define   BSP_POUT2_01       PCout(1)
+#define   BSP_POUT2_02       PCout(15)
+#define   BSP_POUT2_03       PCout(13)
+#define   BSP_POUT2_04       PEout(5)
+#define   BSP_POUT2_05       PCout(5)  
+#define   BSP_POUT2_06       PBout(1)  
+#define   BSP_POUT2_07       PEout(8) 
+#define   BSP_POUT2_08       PEout(10)  
+
+#define   BSP_POUT3_01       PEout(12) //（SCL信号，短接帽可选）  
+#define   BSP_POUT3_02       PEout(13) //(SDA信号，短接帽可选)  
+#define   BSP_POUT3_03       PDout(9)  //(485使能发送接收信号，短接帽可选) 
+#define   BSP_POUT3_04       PEout(11)  
+#define   BSP_POUT3_05       PEout(9)  
+#define   BSP_POUT3_06       PEout(7) 
+#define   BSP_POUT3_07       PBout(0)  
+#define   BSP_POUT3_08       PCout(4) 
+
+#define   BSP_POUT3_09      PAout(6)  
+
+#define   Tx485_En()          {BSP_POUT3_03=1;}  //需要跳帽选择
+#define   Rx485_En()          {BSP_POUT3_03=0;}  //需要跳帽选择
+
+
+
+#define   BeepOn()            {BSP_POUT1_01=0;}
+#define   BeepOff()           {BSP_POUT1_01=1;}
+
+#define   ResLedOn()          {BSP_POUT1_02=0;}
+#define   ResLedOff()         {BSP_POUT1_02=1;}
+
+#define   LStartLedOn()       {BSP_POUT1_03=0;}
+#define   LStartLedOff()      {BSP_POUT1_03=1;}
+
+#define   RStartLedOn()       {BSP_POUT1_04=0;}
+#define   RStartLedOff()      {BSP_POUT1_04=1;}
+
+#define   HeatStartLedOn()    {BSP_POUT1_05=0;}
+#define   HeatStartLedOff()   {BSP_POUT1_05=1;}
+
+//#define   VacuumOn()          {BSP_POUT1_06=0;}
+//#define   VacuumOff()         {BSP_POUT1_06=1;}
+
+#define   PVacuumOn()         {BSP_POUT1_06=0;}
+#define   PVacuumOff()        {BSP_POUT1_06=1;}
+
+#define   NVacuumOn()         {BSP_POUT1_07=0;} 
+#define   NVacuumOff()        {BSP_POUT1_07=1;}
+
+#define   LMotorOn()          {BSP_POUT1_08=0;}
+#define   LMotorOff()         {BSP_POUT1_08=1;}
+
+#define   RMotorOn()          {BSP_POUT2_01=0;}
+#define   RMotorOff()         {BSP_POUT2_01=1;}
+
+#define   HeatOn()            {BSP_POUT2_02=0;BSP_POUT2_03=0;BSP_POUT2_04=0;BSP_POUT2_05=0;}
+#define   HeatOff()           {BSP_POUT2_02=1;BSP_POUT2_03=1;BSP_POUT2_04=1;BSP_POUT2_05=1;}
+
+///输入
+#define   BSP_PIN1_01        PEin(0)
+#define   BSP_PIN1_02        PEin(1)
+#define   BSP_PIN1_03        PBin(5)
+#define   BSP_PIN1_04        PBin(9)
+#define   BSP_PIN1_05        PDin(6)
+#define   BSP_PIN1_06        PDin(7)
+#define   BSP_PIN1_07        PDin(4)
+#define   BSP_PIN1_08        PDin(5)  
+
+#define   BSP_PIN2_01        PDin(2)  
+#define   BSP_PIN2_02        PDin(3)
+#define   BSP_PIN2_03        PDin(0)
+#define   BSP_PIN2_04        PDin(1)
+#define   BSP_PIN2_05        PAin(12)
+#define   BSP_PIN2_06        PCin(12)
+#define   BSP_PIN2_07        PCin(9)
+#define   BSP_PIN2_08        PAin(8)
+
+#define   BSP_PIN3_01        PCin(6)  
+#define   BSP_PIN3_02        PCin(7)
+#define   BSP_PIN3_03        PDin(14)
+#define   BSP_PIN3_04        PDin(15)
+#define   BSP_PIN3_05        PDin(12)
+#define   BSP_PIN3_06        PDin(13)
+#define   BSP_PIN3_07        PDin(10)
+#define   BSP_PIN3_08        PDin(11)
+
+
+/*
+*********************************************************************************************************
+*                                               INT DEFINES
+*********************************************************************************************************
+*/
+
+#define  BSP_INT_ID_WWDG                                   0    /* Window WatchDog Interrupt                            */
+#define  BSP_INT_ID_PVD                                    1    /* PVD through EXTI Line detection Interrupt            */
+#define  BSP_INT_ID_TAMPER                                 2    /* Tamper Interrupt                                     */
+#define  BSP_INT_ID_RTC                                    3    /* RTC global Interrupt                                 */
+#define  BSP_INT_ID_FLASH                                  4    /* FLASH global Interrupt                               */
+#define  BSP_INT_ID_RCC                                    5    /* RCC global Interrupt                                 */
+#define  BSP_INT_ID_EXTI0                                  6    /* EXTI Line0 Interrupt                                 */
+#define  BSP_INT_ID_EXTI1                                  7    /* EXTI Line1 Interrupt                                 */
+#define  BSP_INT_ID_EXTI2                                  8    /* EXTI Line2 Interrupt                                 */
+#define  BSP_INT_ID_EXTI3                                  9    /* EXTI Line3 Interrupt                                 */
+#define  BSP_INT_ID_EXTI4                                 10    /* EXTI Line4 Interrupt                                 */
+#define  BSP_INT_ID_DMA1_CH1                              11    /* DMA1 Channel 1 global Interrupt                      */
+#define  BSP_INT_ID_DMA1_CH2                              12    /* DMA1 Channel 2 global Interrupt                      */
+#define  BSP_INT_ID_DMA1_CH3                              13    /* DMA1 Channel 3 global Interrupt                      */
+#define  BSP_INT_ID_DMA1_CH4                              14    /* DMA1 Channel 4 global Interrupt                      */
+#define  BSP_INT_ID_DMA1_CH5                              15    /* DMA1 Channel 5 global Interrupt                      */
+#define  BSP_INT_ID_DMA1_CH6                              16    /* DMA1 Channel 6 global Interrupt                      */
+#define  BSP_INT_ID_DMA1_CH7                              17    /* DMA1 Channel 7 global Interrupt                      */
+#define  BSP_INT_ID_ADC1_2                                18    /* ADC1 et ADC2 global Interrupt                        */
+#define  BSP_INT_ID_CAN1_TX                               19    /* CAN1 TX Interrupts                                   */
+#define  BSP_INT_ID_CAN1_RX0                              20    /* CAN1 RX0 Interrupts                                  */
+#define  BSP_INT_ID_CAN1_RX1                              21    /* CAN1 RX1 Interrupt                                   */
+#define  BSP_INT_ID_CAN1_SCE                              22    /* CAN1 SCE Interrupt                                   */
+#define  BSP_INT_ID_EXTI9_5                               23    /* External Line[9:5] Interrupts                        */
+#define  BSP_INT_ID_TIM1_BRK                              24    /* TIM1 Break Interrupt                                 */
+#define  BSP_INT_ID_TIM1_UP                               25    /* TIM1 Update Interrupt                                */
+#define  BSP_INT_ID_TIM1_TRG_COM                          26    /* TIM1 Trigger and Commutation Interrupt               */
+#define  BSP_INT_ID_TIM1_CC                               27    /* TIM1 Capture Compare Interrupt                       */
+#define  BSP_INT_ID_TIM2                                  28    /* TIM2 global Interrupt                                */
+#define  BSP_INT_ID_TIM3                                  29    /* TIM3 global Interrupt                                */
+#define  BSP_INT_ID_TIM4                                  30    /* TIM4 global Interrupt                                */
+#define  BSP_INT_ID_I2C1_EV                               31    /* I2C1 Event Interrupt                                 */
+#define  BSP_INT_ID_I2C1_ER                               32    /* I2C1 Error Interrupt                                 */
+#define  BSP_INT_ID_I2C2_EV                               33    /* I2C2 Event Interrupt                                 */
+#define  BSP_INT_ID_I2C2_ER                               34    /* I2C2 Error Interrupt                                 */
+#define  BSP_INT_ID_SPI1                                  35    /* SPI1 global Interrupt                                */
+#define  BSP_INT_ID_SPI2                                  36    /* SPI2 global Interrupt                                */
+#define  BSP_INT_ID_USART1                                37    /* USART1 global Interrupt                              */
+#define  BSP_INT_ID_USART2                                38    /* USART2 global Interrupt                              */
+#define  BSP_INT_ID_USART3                                39    /* USART3 global Interrupt                              */
+#define  BSP_INT_ID_EXTI15_10                             40    /* External Line[15:10] Interrupts                      */
+#define  BSP_INT_ID_RTC_ALARM                             41    /* RTC Alarm through EXTI Line Interrupt                */
+#define  BSP_INT_ID_OTG_FS_WKUP                           42    /* USB WakeUp from suspend through EXTI Line Interrupt  */
+
+#define  BSP_INT_ID_TIM5                                  50    /* TIM5 global Interrupt                                */
+#define  BSP_INT_ID_SPI3                                  51    /* SPI3 global Interrupt                                */
+#define  BSP_INT_ID_USART4                                52    /* USART4 global Interrupt                              */
+#define  BSP_INT_ID_USART5                                53    /* USRT5 global Interrupt                               */
+#define  BSP_INT_ID_TIM6                                  54    /* TIM6 global Interrupt                                */
+#define  BSP_INT_ID_TIM7                                  55    /* TIM7 global Interrupt                                */
+#define  BSP_INT_ID_DMA2_CH1                              56    /* DMA2 Channel 1 global Interrupt                      */
+#define  BSP_INT_ID_DMA2_CH2                              57    /* DMA2 Channel 2 global Interrupt                      */
+#define  BSP_INT_ID_DMA2_CH3                              58    /* DMA2 Channel 3 global Interrupt                      */
+#define  BSP_INT_ID_DMA2_CH4                              59    /* DMA2 Channel 4 global Interrupt                      */
+#define  BSP_INT_ID_DMA2_CH5                              60    /* DMA2 Channel 5 global Interrupt                      */
+
+#define  BSP_INT_ID_ETH                                   61    /* ETH  global Interrupt                                */
+#define  BSP_INT_ID_ETH_WKUP                              62    /* ETH  WakeUp from EXTI line interrupt                 */
+#define  BSP_INT_ID_CAN2_TX                               63    /* CAN2 TX Interrupts                                   */
+#define  BSP_INT_ID_CAN2_RX0                              64    /* CAN2 RX0 Interrupts                                  */
+#define  BSP_INT_ID_CAN2_RX1                              65    /* CAN2 RX1 Interrupt                                   */
+#define  BSP_INT_ID_CAN2_SCE                              66    /* CAN2 SCE Interrupt                                   */
+#define  BSP_INT_ID_OTG_FS                                67    /* OTG global Interrupt                                 */
+
+
+/*
+*********************************************************************************************************
+*                                             PERIPH DEFINES
+*********************************************************************************************************
+*/
+
+#define  BSP_PERIPH_ID_DMA1                                0
+#define  BSP_PERIPH_ID_DMA2                                1
+#define  BSP_PERIPH_ID_SRAM                                2
+#define  BSP_PERIPH_ID_FLITF                               4
+#define  BSP_PERIPH_ID_CRC                                 6
+#define  BSP_PERIPH_ID_OTGFS                              12
+#define  BSP_PERIPH_ID_ETHMAC                             14
+#define  BSP_PERIPH_ID_ETHMACTX                           15
+
+#define  BSP_PERIPH_ID_AFIO                               32
+#define  BSP_PERIPH_ID_IOPA                               34
+#define  BSP_PERIPH_ID_IOPB                               35
+#define  BSP_PERIPH_ID_IOPC                               36
+#define  BSP_PERIPH_ID_IOPD                               37
+#define  BSP_PERIPH_ID_IOPE                               38
+#define  BSP_PERIPH_ID_ADC1                               41
+#define  BSP_PERIPH_ID_ADC2                               42
+#define  BSP_PERIPH_ID_TIM1                               43
+#define  BSP_PERIPH_ID_SPI1                               44
+#define  BSP_PERIPH_ID_USART1                             46
+
+#define  BSP_PERIPH_ID_TIM2                               64
+#define  BSP_PERIPH_ID_TIM3                               65
+#define  BSP_PERIPH_ID_TIM4                               66
+#define  BSP_PERIPH_ID_TIM5                               67
+#define  BSP_PERIPH_ID_TIM6                               68
+#define  BSP_PERIPH_ID_TIM7                               69
+#define  BSP_PERIPH_ID_WWDG                               75
+#define  BSP_PERIPH_ID_SPI2                               78
+#define  BSP_PERIPH_ID_SPI3                               79
+#define  BSP_PERIPH_ID_USART2                             81
+#define  BSP_PERIPH_ID_USART3                             82
+#define  BSP_PERIPH_ID_USART4                             83
+#define  BSP_PERIPH_ID_USART5                             84
+#define  BSP_PERIPH_ID_I2C1                               85
+#define  BSP_PERIPH_ID_I2C2                               86
+#define  BSP_PERIPH_ID_CAN1                               89
+#define  BSP_PERIPH_ID_CAN2                               90
+#define  BSP_PERIPH_ID_BKP                                91
+#define  BSP_PERIPH_ID_PWR                                92
+#define  BSP_PERIPH_ID_DAC                                93
+
+
+
+
+/*
+*********************************************************************************************************
+*                                               DATA TYPES
+*********************************************************************************************************
+*/
+//Sensor_Status_Flag传感器状态保存
+typedef struct {
+      
+      CPU_INT08U L_Motor_P:1;   //左电机上限位（原点位置）  
+      CPU_INT08U L_Motor_N:1;   //左电机电机下限位
+      CPU_INT08U R_Motor_P:1;   //右电机上限位（原点位置）
+      CPU_INT08U R_Motor_N:1;   //右电机下限位
+      CPU_INT08U Vacuum_P:1;    //上真空表状态
+      CPU_INT08U Vacuum_N:1;    //下真空表状态
+      CPU_INT08U Vacuum:1;      //总真空表状态         
+      CPU_INT08U L_Start:1;     //左启动按钮
+      
+      
+      CPU_INT08U R_Start:1;     //右启动按钮
+      CPU_INT08U Reset:1;       //复位按钮
+      CPU_INT08U Emergency:1;   //急停标志 
+      CPU_INT08U Heat_Start:1;  //加热按钮 
+      CPU_INT08U DoorDet:1;     //光栅状态
+      CPU_INT08U Vacuum_Sta:1;  //真空打开状态
+      CPU_INT08U Res_Led_Sta:1; //复位指示灯状态
+      CPU_INT08U EmeEvent:1;    //急停松开标志 
+      
+      CPU_INT08U Fixture_Mode:1;
+      CPU_INT08U Input1:1;
+      CPU_INT08U Input2:1;
+      CPU_INT08U Input3:1;
+      CPU_INT08U Input4:1;
+      CPU_INT08U Input5:1;
+      CPU_INT08U Input6:1;
+      CPU_INT08U Input7:1;
+      CPU_INT08U Input8:1;
+      CPU_INT08U Input9:1;
+      CPU_INT08U Input10:1;
+      CPU_INT08U Input11:1;
+      CPU_INT08U Input12:1;
+      CPU_INT08U Input13:1;
+      
+      CPU_INT08U LMotorOriStopDet:1;//左电机原点停机检测
+      CPU_INT08U RMotorOriStopDet:1;//右电机原点停机检测
+      CPU_INT08U LMotorUp:1;  //左电机向上移动标志
+      CPU_INT08U LMotorDown:1;//左电机向下移动标志
+      CPU_INT08U RMotorUp:1;  //右电机向上移动标志
+      CPU_INT08U RMotorDown:1;//右电机向下移动标志
+      
+      CPU_INT08U LMotorWorkingUp:1;  //左电机working向上移动标志
+      CPU_INT08U RMotorWorkingUp:1;  //右电机working向上移动标志
+      
+      CPU_INT08U Heat_Event:1;//
+      CPU_INT08U Reset_Event:1;//复位标志
+      CPU_INT08U DoorEn:1;     //光栅检测使能
+      CPU_INT08U Heat_Vacuum_N:1; //加热下真空开使能
+      
+      CPU_INT08U RunTimeEn:1; //运行计时使能
+      CPU_INT08U HeatRunTimeEn:1; //加热运行倒计时使能  
+      CPU_INT08U FinishedWaitTEn:1;
+      CPU_INT08U Vacuum_PWaitEn:1;   //上真空等待检测时间
+      CPU_INT08U PressureLEn:1;     //压力左检测过压停机使能
+      CPU_INT08U PressureREn:1;     //压力右检测过压停机使能
+      CPU_INT08U PressureLWaitEn:1;     //压力左检测过压停机计时使能
+      CPU_INT08U PressureRWaitEn:1;     //压力右检测过压停机计时使能
+      //CPU_INT08U OverPreStartT:1;//压力左检测过压停机计时使能
+      CPU_INT08U DoorMode:1;     //光栅检测使能
+      CPU_INT08U DoorEve:1;     //光栅事件
+}Sensor_Status_Flag;
+
+
+//Fixture_Status_Flag相关标志位
+typedef struct { 
+
+          CPU_INT08U F_RXERRO:1    ;            //串口错误
+          CPU_INT08U F_FixInfo:1    ;           //设备指令
+          CPU_INT08U F_FixResetTimerout:1;      //设备复位超时
+          CPU_INT08U F_FixResetErr:1;           //异常复位指示
+          
+          CPU_INT08U F_CH1_PDStart:1  ;         //CH1开始下压标志
+          CPU_INT08U F_CH1_PDFinish:1   ;       //完成下压标志
+          CPU_INT08U F_CH1_PDReset:1   ;        //通道一压头复位
+          CPU_INT08U F_CH1_START:1   ;          //通道一启动1
+          CPU_INT08U F_CH1_EXIT:1   ;           //通道一退出
+          CPU_INT08U F_CH1_PendingDrop:1;       //等待下压
+          CPU_INT08U F_CH1_PendingRise:1;       //等待退出
+          CPU_INT08U F_CH1_SPInSitu:1;          //在位检测
+          CPU_INT08U F_CH1_CNT:1;               //计数器
+          
+                                                 //CH1通讯接口打印Info标志
+          CPU_INT08U F_CH1_UP_Drop:1;            //平台下压
+          CPU_INT08U F_CH1_UP_Rise:1;            //平台上升
+          CPU_INT08U F_CH1_UP_Vbus:1;            //Vbus切换
+          CPU_INT08U F_CH1_UP_FLoad:1;           //强制加载
+          CPU_INT08U F_CH1_UP_CNT:1;             //计数
+          CPU_INT08U F_CH1_UP_LB:1;              //锁定按键、
+          CPU_INT08U F_CH1_UP_TPress:1;          //查询压力值
+          CPU_INT08U F_CH1_UP_SETPress:1;        //设定压力值
+          CPU_INT08U F_CH1_UP_Reset:1;           //CH1复位
+          CPU_INT08U F_CH1_UP_PDSt:1;            //CH1产品状态
+           
+          CPU_INT08U F_CH2_PDStart:1  ;         //CH2开始下压标志
+          CPU_INT08U F_CH2_PDFinish:1   ;       //完成下压标志
+          CPU_INT08U F_CH2_PDReset:1   ;        //通道一压头复位
+          CPU_INT08U F_CH2_START:1   ;          //通道一启动1
+          CPU_INT08U F_CH2_EXIT:1   ;           //通道一退出
+          CPU_INT08U F_CH2_PendingDrop:1;       //等待下压
+          CPU_INT08U F_CH2_PendingRise:1;       //等待退出
+          CPU_INT08U F_CH2_SPInSitu:1;          //在位检测 
+          CPU_INT08U F_CH2_CNT:1;               //CH2计数器
+          
+                                                 //CH2通讯接口打印Info标志
+          CPU_INT08U F_CH2_UP_Drop:1;            //平台下压
+          CPU_INT08U F_CH2_UP_Rise:1;            //平台上升
+          CPU_INT08U F_CH2_UP_Vbus:1;            //Vbus切换
+          CPU_INT08U F_CH2_UP_FLoad:1;           //强制加载
+          CPU_INT08U F_CH2_UP_CNT:1;             //计数
+          CPU_INT08U F_CH2_UP_LB:1;              //锁定按键、
+          CPU_INT08U F_CH2_UP_TPress:1;          //查询压力值
+          CPU_INT08U F_CH2_UP_SETPress:1;        //设定压力值
+          CPU_INT08U F_CH2_UP_Reset:1;           //CH2复位
+          CPU_INT08U F_CH2_UP_PDSt:1;            //CH2产品状态
+          
+          CPU_INT08U F_CH3_PDStart:1  ;         //CH3开始下压标志
+          CPU_INT08U F_CH3_PDFinish:1   ;       //完成下压标志
+          CPU_INT08U F_CH3_PDReset:1   ;        //通道一压头复位
+          CPU_INT08U F_CH3_START:1   ;          //通道一启动1
+          CPU_INT08U F_CH3_EXIT:1   ;           //通道一退出
+          CPU_INT08U F_CH3_PendingDrop:1;       //等待下压
+          CPU_INT08U F_CH3_PendingRise:1;       //等待退出
+          CPU_INT08U F_CH3_SPInSitu:1;          //在位检测 
+          CPU_INT08U F_CH3_CNT:1;               //CH3计数器
+          
+                                                 //CH3通讯接口打印Info标志
+          CPU_INT08U F_CH3_UP_Drop:1;            //平台下压
+          CPU_INT08U F_CH3_UP_Rise:1;            //平台上升
+          CPU_INT08U F_CH3_UP_Vbus:1;            //Vbus切换
+          CPU_INT08U F_CH3_UP_FLoad:1;           //强制加载
+          CPU_INT08U F_CH3_UP_CNT:1;             //计数
+          CPU_INT08U F_CH3_UP_LB:1;              //锁定按键、
+          CPU_INT08U F_CH3_UP_TPress:1;          //查询压力值
+          CPU_INT08U F_CH3_UP_SETPress:1;        //设定压力值
+          CPU_INT08U F_CH3_UP_Reset:1;           //CH3复位
+          CPU_INT08U F_CH3_UP_PDSt:1;            //CH3产品状态
+
+          CPU_INT08U F_CH4_PDStart:1  ;         //CH4开始下压标志
+          CPU_INT08U F_CH4_PDFinish:1   ;       //完成下压标志
+          CPU_INT08U F_CH4_PDReset:1   ;        //通道一压头复位
+          CPU_INT08U F_CH4_START:1   ;          //通道一启动1
+          CPU_INT08U F_CH4_EXIT:1   ;           //通道一退出
+          CPU_INT08U F_CH4_PendingDrop:1;       //等待下压
+          CPU_INT08U F_CH4_PendingRise:1;       //等待退出
+          CPU_INT08U F_CH4_SPInSitu:1;          //在位检测
+          CPU_INT08U F_CH4_CNT:1;               //CH4计数器
+          
+                                                 //CH4通讯接口打印Info标志
+          CPU_INT08U F_CH4_UP_Drop:1;            //平台下压
+          CPU_INT08U F_CH4_UP_Rise:1;            //平台上升
+          CPU_INT08U F_CH4_UP_Vbus:1;            //Vbus切换
+          CPU_INT08U F_CH4_UP_FLoad:1;           //强制加载
+          CPU_INT08U F_CH4_UP_CNT:1;             //计数
+          CPU_INT08U F_CH4_UP_LB:1;              //锁定按键、
+          CPU_INT08U F_CH4_UP_TPress:1;          //查询压力值
+          CPU_INT08U F_CH4_UP_SETPress:1;        //设定压力值
+          CPU_INT08U F_CH4_UP_Reset:1;           //CH4复位
+          CPU_INT08U F_CH4_UP_PDSt:1;            //CH4产品状态
+          
+}Fixture_Status_Flag;
+
+
+
+/*
+*********************************************************************************************************
+*                                            GLOBAL VARIABLES
+*********************************************************************************************************
+*/
+EXT Fixture_Status_Flag   AppTask_Fixture_Status;
+EXT Sensor_Status_Flag    AppTask_Sensor_Status;
+
+/*
+*********************************************************************************************************
+*                                                 MACRO'S
+*********************************************************************************************************
+*/
+
+
+/*
+*********************************************************************************************************
+*                                           FUNCTION PROTOTYPES
+*********************************************************************************************************
+*/
+
+void         BSP_Init                    (void);
+
+void         BSP_IntDisAll               (void);
+
+CPU_INT32U   BSP_CPU_ClkFreq             (void);
+
+
+/*
+*********************************************************************************************************
+*                                           INTERRUPT SERVICES
+*********************************************************************************************************
+*/
+
+void         BSP_IntInit                 (void);
+
+void         BSP_IntEn                   (CPU_DATA       int_id);
+
+void         BSP_IntDis                  (CPU_DATA       int_id);
+
+void         BSP_IntClr                  (CPU_DATA       int_id);
+
+void         BSP_IntVectSet              (CPU_DATA       int_id,
+                                          CPU_FNCT_VOID  isr);
+
+void         BSP_IntPrioSet              (CPU_DATA       int_id,
+                                          CPU_INT08U     prio);
+
+void         BSP_IntHandlerWWDG          (void);
+void         BSP_IntHandlerPVD           (void);
+void         BSP_IntHandlerTAMPER        (void);
+void         BSP_IntHandlerRTC           (void);
+void         BSP_IntHandlerFLASH         (void);
+void         BSP_IntHandlerRCC           (void);
+void         BSP_IntHandlerEXTI0         (void);
+void         BSP_IntHandlerEXTI1         (void);
+void         BSP_IntHandlerEXTI2         (void);
+void         BSP_IntHandlerEXTI3         (void);
+void         BSP_IntHandlerEXTI4         (void);
+void         BSP_IntHandlerDMA1_CH1      (void);
+void         BSP_IntHandlerDMA1_CH2      (void);
+void         BSP_IntHandlerDMA1_CH3      (void);
+void         BSP_IntHandlerDMA1_CH4      (void);
+void         BSP_IntHandlerDMA1_CH5      (void);
+
+void         BSP_IntHandlerDMA1_CH6      (void);
+void         BSP_IntHandlerDMA1_CH7      (void);
+void         BSP_IntHandlerADC1_2        (void);
+void         BSP_IntHandlerCAN1_TX       (void);
+void         BSP_IntHandlerCAN1_RX0      (void);
+void         BSP_IntHandlerCAN1_RX1      (void);
+void         BSP_IntHandlerCAN1_SCE      (void);
+void         BSP_IntHandlerEXTI9_5       (void);
+void         BSP_IntHandlerTIM1_BRK      (void);
+void         BSP_IntHandlerTIM1_UP       (void);
+void         BSP_IntHandlerTIM1_TRG_COM  (void);
+void         BSP_IntHandlerTIM1_CC       (void);
+void         BSP_IntHandlerTIM2          (void);
+void         BSP_IntHandlerTIM3          (void);
+void         BSP_IntHandlerTIM4          (void);
+void         BSP_IntHandlerI2C1_EV       (void);
+
+void         BSP_IntHandlerI2C1_ER       (void);
+void         BSP_IntHandlerI2C2_EV       (void);
+void         BSP_IntHandlerI2C2_ER       (void);
+void         BSP_IntHandlerSPI1          (void);
+void         BSP_IntHandlerSPI2          (void);
+void         BSP_IntHandlerUSART1        (void);
+void         BSP_IntHandlerUSART2        (void);
+void         BSP_IntHandlerUSART3        (void);
+void         BSP_IntHandlerEXTI15_10     (void);
+void         BSP_IntHandlerRTCAlarm      (void);
+void         BSP_IntHandlerUSBWakeUp     (void);
+
+void         BSP_IntHandlerTIM5          (void);
+void         BSP_IntHandlerSPI3          (void);
+void         BSP_IntHandlerUSART4        (void);
+void         BSP_IntHandlerUSART5        (void);
+void         BSP_IntHandlerTIM6          (void);
+void         BSP_IntHandlerTIM7          (void);
+void         BSP_IntHandlerDMA2_CH1      (void);
+void         BSP_IntHandlerDMA2_CH2      (void);
+void         BSP_IntHandlerDMA2_CH3      (void);
+void         BSP_IntHandlerDMA2_CH4      (void);
+void         BSP_IntHandlerDMA2_CH5      (void);
+void         BSP_IntHandlerETH           (void);
+void         BSP_IntHandlerETHWakeup     (void);
+void         BSP_IntHandlerCAN2_TX       (void);
+void         BSP_IntHandlerCAN2_RX0      (void);
+void         BSP_IntHandlerCAN2_RX1      (void);
+void         BSP_IntHandlerCAN2_SCE      (void);
+void         BSP_IntHandlerOTG           (void);
+
+
+/*
+*********************************************************************************************************
+*                                     PERIPHERAL POWER/CLOCK SERVICES
+*********************************************************************************************************
+*/
+
+CPU_INT32U   BSP_PeriphClkFreqGet        (CPU_DATA       pwr_clk_id);
+
+void         BSP_PeriphEn                (CPU_DATA       pwr_clk_id);
+
+void         BSP_PeriphDis               (CPU_DATA       pwr_clk_id);
+
+
+/*
+*********************************************************************************************************
+*                                              LED SERVICES
+*********************************************************************************************************
+*/
+void Checkparama_AND_Inital(void);
+void ReadFP32TOBUFF(CPU_FP32 *Temp_dat,CPU_INT16U Add);
+
+/*
+*********************************************************************************************************
+*                                              STATUS INPUTS
+*********************************************************************************************************
+*/
+
+
+/*
+*********************************************************************************************************
+*                                             MODULE END
+*********************************************************************************************************
+*/
+
+
+#endif                                                          /* End of module include.                               */

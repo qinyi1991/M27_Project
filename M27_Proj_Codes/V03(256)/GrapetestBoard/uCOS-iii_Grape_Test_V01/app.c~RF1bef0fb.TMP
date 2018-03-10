@@ -1,0 +1,452 @@
+/*
+*********************************************************************************************************
+*                                              EXAMPLE CODE
+*
+*                             (c) Copyright 2009; Micrium, Inc.; Weston, FL
+*
+*               All rights reserved.  Protected by international copyright laws.
+*               Knowledge of the source code may NOT be used to develop a similar product.
+*               Please help us continue to provide the Embedded community with the finest
+*               software available.  Your honesty is greatly appreciated.
+*********************************************************************************************************
+*/
+
+/*
+*********************************************************************************************************
+*
+*                                            EXAMPLE CODE
+*
+*                                     ST Microelectronics STM32
+*                                              on the
+*
+*                                     Micrium uC-Eval-STM32F107
+*                                        Evaluation Board
+*
+* Filename      : app.c
+* Version       : V1.00
+* Programmer(s) : JJL
+                  EHS
+*********************************************************************************************************
+*/
+
+/*
+*********************************************************************************************************
+*                                             INCLUDE FILES
+*********************************************************************************************************
+*/
+
+#include <app.h>
+
+
+/*
+*********************************************************************************************************
+*                                             LOCAL DEFINES
+*********************************************************************************************************
+*/
+#define   RXBUFFERSIZE   50
+
+/*
+*********************************************************************************************************
+*                                            LOCAL VARIABLES
+*********************************************************************************************************
+*/
+static  OS_SEM   AppSem; 
+
+///启动任务
+static  OS_TCB   AppTaskStartTCB; 
+static  CPU_STK  AppTaskStartStk[APP_TASK_START_STK_SIZE];
+
+///通信控制任务
+OS_TCB   AppTaskSerDataHandlingTCB; 
+static   CPU_STK  AppTaskSerDataHandlingStk[APP_TASK_SER_DATA_HANDLING_STK_SIZE];
+
+///运动控制任务
+static   OS_TCB   AppTaskMotionControlTCB;
+#pragma data_alignment=8  //任务堆栈是8字节对齐，任务要使用浮点数输出
+static  CPU_STK  AppTaskMotionControlStk[APP_TASK_MOTION_CONTROL_STK_SIZE];
+/*
+*********************************************************************************************************
+*                                            GLOBE VARIABLES
+*********************************************************************************************************
+*/
+//标志位
+Fixture_Status_Flag   AppTask_Fixture_Status; //App    应用·标志位
+Sensor_Status_Flag    AppTask_Sensor_Status;  //Sensor 感应器·标志位
+//定时扫描任务
+static  OS_TMR   AppSensorScanTCB;
+
+//全局变量
+CPU_INT32U  Mtion_ABS_POS_Abs=0,Mtion_ABS_POS_Relative=0,Gross_Product_Counters=0; //相对原点，当前位置；产量计数；
+CPU_INT32U  Mtion_ABS_POS_Left_PRO=0;   
+CPU_INT32U  
+         
+//行程保护
+//压力测量值
+CPU_FP64  ADC1_ConvertedValue;
+
+//MAIN 温度参数
+CPU_FP64   Modulus;	   
+CPU_FP64   CalValueAD_Zero;
+CPU_FP64   CalValueAD_25C;
+CPU_FP64   CalValueAD_80C;
+
+//PID参数
+CPU_FP32     Work_KP=10.2,Work_TI=0.2,Work_TD=0.2,          \
+             Preview_KP=10.0,Preview_TI=0.2,Preview_TD=0.2;
+
+//SD卡文件系统
+
+
+//软件版本信息
+//CPU_INT08U  SF_Version[1][10]={"HW1512V01"};
+//CPU_FP32    test_val=2.156;
+//CPU_INT08U  *ptest=(CPU_INT08U*)&test_val;
+
+/*
+*********************************************************************************************************
+*                                         FUNCTION PROTOTYPES
+*********************************************************************************************************
+*/
+
+static  void  AppTaskStart  (void *p_arg);
+static  void  AppTaskSerDataHandling (void *p_arg);
+static  void  AppTaskMotionControl (void *p_arg);
+static  void  AppTaskCreate (void);
+/*
+*********************************************************************************************************
+*                                                main()
+*
+* Description : This is the standard entry point for C code.  It is assumed that your code will call
+*               main() once you have performed all necessary initialization.
+*
+* Arguments   : none
+*
+* Returns     : none
+*********************************************************************************************************/
+void main (void)
+{
+    OS_ERR  err;
+
+
+    BSP_IntDisAll();                                            /* Disable all interrupts.*/
+       
+    OSInit(&err);                                               /* Init uC/OS-III. */
+
+    OSTaskCreate((OS_TCB     *)&AppTaskStartTCB,                /* Create the start task                                */
+                 (CPU_CHAR   *)"App Task Start",
+                 (OS_TASK_PTR )AppTaskStart, 
+                 (void       *)0,
+                 (OS_PRIO     )APP_TASK_START_PRIO,
+                 (CPU_STK    *)&AppTaskStartStk[0],
+                 (CPU_STK_SIZE)APP_TASK_START_STK_SIZE / 10,
+                 (CPU_STK_SIZE)APP_TASK_START_STK_SIZE,
+                 (OS_MSG_QTY  )0,
+                 (OS_TICK     )0,
+                 (void       *)0,
+                 (OS_OPT      )(OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR),
+                 (OS_ERR     *)&err);
+
+    OSStart(&err);                                              /* Start multitasking (i.e. give control to uC/OS-III). */
+}
+
+/*
+*********************************************************************************************************
+*                                          STARTUP TASK
+*
+* Description : This is an example of a startup task.  As mentioned in the book's text, you MUST
+*               initialize the ticker only once multitasking has started.
+*
+* Arguments   : p_arg   is the argument passed to 'AppTaskStart()' by 'OSTaskCreate()'.
+*
+* Returns     : none
+*
+* Notes       : 1) The first line of code is used to prevent a compiler warning because 'p_arg' is not
+*                  used.  The compiler should not generate any code for this statement.
+*********************************************************************************************************
+*/
+
+static  void  AppTaskStart (void *p_arg)
+{
+    CPU_INT32U  cpu_clk_freq,cnts;
+    OS_ERR      err;
+    
+   (void)p_arg;
+
+    BSP_Init();                                                   /* Initialize BSP functions                         */   
+    Checkparama_AND_Inital();                                     //初始化modus相关参数
+      
+    App_OS_SetAllHooks();                                         //在J节拍中断服务中插入代码
+     
+    BSP_OS_SemCreate(&AppSem, 1, "Motion Control");              //创建一个  AppSem应用信号,控制马达动作                                                        
+      
+    cpu_clk_freq = BSP_CPU_ClkFreq();                             /* Determine SysTick reference freq.                */                                                                        
+    cnts         = cpu_clk_freq / (CPU_INT32U)OSCfg_TickRate_Hz;  /* Determine nbr SysTick increments                 */
+    OS_CPU_SysTickInit(cnts);                                     /* Init uC/OS periodic time src (SysTick).          */
+   
+    AppTaskCreate();                        //创建应用任务
+    
+    while (DEF_TRUE) {                                          /* Task body, always written as an infinite loop.   */  
+           
+              OSTimeDlyHMSM( 24,
+                             0,
+                             0,
+                             0,
+                             OS_OPT_TIME_HMSM_STRICT,
+                             &err);                
+    }     
+}
+
+/*
+*********************************************************************************************************
+*                                          AppTaskCreate
+*
+* Description : 用于应用任务的创建
+*
+* Arguments   : p_arg   is the argument passed to 'AppTaskCreate()' by 'OSTaskCreate()'.
+*
+* Returns     : none
+*
+* Notes       : 1) The first line of code is used to prevent a compiler warning because 'p_arg' is not
+*                  used.  The compiler should not generate any code for this statement.
+*********************************************************************************************************
+*/
+static  void  AppTaskCreate (void)
+{
+    OS_ERR      err;
+  
+    //创建任务一：用于串行通信
+    //用中断采集数据
+    OSTaskCreate((OS_TCB     *)&AppTaskSerDataHandlingTCB,           /* Create the SerDataHandling                   */
+                 (CPU_CHAR   *)"App Task Ser Data Handling",              
+                 (OS_TASK_PTR )AppTaskSerDataHandling, 
+                 (void       *)0,
+                 (OS_PRIO     )APP_TASK_SER_DATA_HANDLING_PRIO,
+                 (CPU_STK    *)&AppTaskSerDataHandlingStk[0],
+                 (CPU_STK_SIZE)APP_TASK_SER_DATA_HANDLING_STK_SIZE / 10,
+                 (CPU_STK_SIZE)APP_TASK_SER_DATA_HANDLING_STK_SIZE,
+                 (OS_MSG_QTY  )0,
+                 (OS_TICK     )0,
+                 (void       *)0,
+                 (OS_OPT      )(OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR),
+                 (OS_ERR     *)&err);      
+    
+     //创建任务二：用于运动控制       
+     OSTaskCreate((OS_TCB     *)&AppTaskMotionControlTCB,            /* Create the MotionControlTCB                    */
+                 (CPU_CHAR   *)"App Task Motion Control",              
+                 (OS_TASK_PTR )AppTaskMotionControl, 
+                 (void       *)0,
+                 (OS_PRIO     )APP_TASK_MOTION_CONTROL_PRIO,
+                 (CPU_STK    *)&AppTaskMotionControlStk[0],
+                 (CPU_STK_SIZE)APP_TASK_MOTION_CONTROL_STK_SIZE / 10,
+                 (CPU_STK_SIZE)APP_TASK_MOTION_CONTROL_STK_SIZE,
+                 (OS_MSG_QTY  )0,
+                 (OS_TICK     )0,
+                 (void       *)0,
+                 (OS_OPT      )(OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR),
+                 (OS_ERR     *)&err); 
+ 
+     //创建任务三：用于数据采集
+     //属性：定时任务,100hz
+     //应用：1，AD数据采集，可以使用DMA传输方式，使用任务监控对应数据的变化;
+     //      2，感应器信号采集
+     
+     OSTmrCreate ((OS_TMR     *)          &AppSensorScanTCB,
+                  (CPU_CHAR   *)          "App Sensor Scan",
+                  (OS_TICK     )          1,
+                  (OS_TICK     )          1, 
+                  (OS_OPT      )          OS_OPT_TMR_PERIODIC,
+                  (OS_TMR_CALLBACK_PTR)   Fixture_Sensor_Scan,
+                  (void*      )           0,
+                  (OS_ERR    *)          &err);
+       
+     OSTmrStart  ((OS_TMR     *)          &AppSensorScanTCB,
+                  (OS_ERR     *)          &err);
+                  
+  
+}
+
+
+/*
+*********************************************************************************************************
+*                                          AppTaskSerDataHandling
+*
+* Description : 串行接口数据处理
+*
+* Arguments   : p_arg   is the argument passed to 'AppTaskSerDataHandling()' by 'OSTaskCreate()'.
+*
+* Returns     : none
+*
+* Notes       : 1) The first line of code is used to prevent a compiler warning because 'p_arg' is not
+*                  used.  The compiler should not generate any code for this statement.
+*********************************************************************************************************
+*/
+static  void  AppTaskSerDataHandling (void *p_arg)
+{
+     OS_ERR      err;
+     CPU_TS      ts;
+     (void)p_arg;  
+       
+     while (DEF_TRUE) {  
+  
+             OSTaskSemPend((OS_TICK )0,
+                           (OS_OPT  )OS_OPT_PEND_BLOCKING,
+                           (CPU_TS *)&ts,
+                           (OS_ERR *)&err);
+             if(err==OS_ERR_NONE){
+                   //处理数据
+                   checkComm0Modbus();   //modbus通信协议
+             }
+             
+             OSTimeDlyHMSM( 0,           
+                            0,
+                            0,
+                           10,
+                           OS_OPT_TIME_HMSM_STRICT,
+                           &err);            
+     }
+}
+
+
+
+/*
+*********************************************************************************************************
+*                                          AppTaskMotionControl
+*
+* Description : 用于运动任务的控制
+*
+* Arguments   : p_arg   is the argument passed to 'AppTaskMotionControl()' by 'OSTaskCreate()'.
+*
+* Returns     : none
+*
+* Notes       : 1) The first line of code is used to prevent a compiler warning because 'p_arg' is not
+*                  used.  The compiler should not generate any code for this statement.
+*********************************************************************************************************
+*/
+static  void  AppTaskMotionControl (void *p_arg)
+{
+        OS_ERR      err;
+        (void)p_arg;  
+          
+        CPU_INT08U   *Ptr_CoilData;
+        CPU_INT16S   *Ptr_RegData;
+           
+        Fixture_Status_Flag  *ptrFSF;
+        Sensor_Status_Flag   *ptrSSF;     
+        
+        static CPU_INT32U  Motion_Speed=0;   
+        
+        
+        Ptr_CoilData=CoilData;
+        Ptr_RegData=RegData;       
+        
+        ptrFSF=&AppTask_Fixture_Status;
+        ptrSSF=&AppTask_Sensor_Status; 
+        
+        //读取手动速度
+        IIC_Channel=1;   
+        
+        while (DEF_TRUE) {                 
+         
+          
+                  if(Coil.Add>0)          
+                  {            
+                          //按钮状态扫描------------------------------------------------------------
+                          switch(Coil.Add)    
+                          {
+                                     //强制端口输出
+                                     case NCoilAdd424:{if(*(Ptr_CoilData+NCoilAdd424) == 1){BSP_POUT01=0;}else{BSP_POUT01=1;}}break;   //1#
+                                     case NCoilAdd425:{if(*(Ptr_CoilData+NCoilAdd425) == 1){BSP_POUT02=0;}else{BSP_POUT02=1;}}break;   //2#
+                                     case NCoilAdd426:{if(*(Ptr_CoilData+NCoilAdd426) == 1){BSP_POUT03=0;}else{BSP_POUT03=1;}}break;   //3# 
+                                     case NCoilAdd427:{if(*(Ptr_CoilData+NCoilAdd427) == 1){BSP_POUT04=0;}else{BSP_POUT04=1;}}break;   //4#
+                                     case NCoilAdd428:{if(*(Ptr_CoilData+NCoilAdd428) == 1){BSP_POUT05=0;}else{BSP_POUT05=1;}}break;   //5#
+                                     case NCoilAdd429:{if(*(Ptr_CoilData+NCoilAdd429) == 1){BSP_POUT06=0;}else{BSP_POUT06=1;}}break;   //6#    
+                                     case NCoilAdd430:{if(*(Ptr_CoilData+NCoilAdd430) == 1){BSP_POUT07=0;}else{BSP_POUT07=1;}}break;   //7#
+                                     case NCoilAdd431:{if(*(Ptr_CoilData+NCoilAdd431) == 1){BSP_POUT08=0;}else{BSP_POUT08=1;}}break;   //8#
+                                     case NCoilAdd432:{if(*(Ptr_CoilData+NCoilAdd432) == 1){BSP_POUT09=0;}else{BSP_POUT09=1;}}break;   //9#
+                                     case NCoilAdd433:{if(*(Ptr_CoilData+NCoilAdd433) == 1){BSP_POUT10=0;}else{BSP_POUT10=1;}}break;   //10#
+                                     case NCoilAdd434:{if(*(Ptr_CoilData+NCoilAdd434) == 1){BSP_POUT11=0;}else{BSP_POUT11=1;}}break;   //11#
+                                     case NCoilAdd435:{if(*(Ptr_CoilData+NCoilAdd435) == 1){BSP_POUT12=0;}else{BSP_POUT12=1;}}break;   //12#
+                                   
+                                     
+                                   //---------------------------------------------------------------手动操作电机 front
+                                    case NCoilAdd459:{	
+                                    
+                                        
+                                                if(*(Ptr_CoilData+NCoilAdd459)== 1){
+                                                      //----$$$-------------------------------------------*(Ptr_RegData+SRegisAdd20)
+                                                      if(Mtion_ABS_POS<=Mtion_ABS_POS_Left_PRO){
+                                                           Motion_Speed=*(Ptr_RegData+SRegisAdd59);
+                                                           Motor1Starting_left(DIR_CW,Motion_Speed);
+                                                      }  
+
+                                                }else{  //停车                                            
+
+                                                      MotorStop_left(TIM3);
+                                                }
+                                  
+                                     
+                                     }break;  
+                                     
+                                     //---------------------------------------------------------------手动操作电机 back
+                                    case NCoilAdd460:{
+                                                if(*(Ptr_CoilData+NCoilAdd460)== 1){
+                                                      //----$$$-------------------------------------------*(Ptr_RegData+SRegisAdd21) 
+                                                  if(Mtion_ABS_POS>0){
+                                                           Motion_Speed=*(Ptr_RegData+SRegisAdd59);
+                                                           Motor1Starting_left(DIR_CCW,Motion_Speed);
+                                                  }                                                                           
+                                                }else{
+                                                      MotorStop_left(TIM3); 
+                                                }
+                                                
+                                      
+                                    } break;
+                                    
+                               
+                                    //---------------------------------------------------------------复位 Reset
+                                    case NCoilAdd461:{                   
+                                           ptrFSF->F_RESET ==1;  //复位    
+                                      
+                                    }break;
+                                        
+                                    //---------------------------------------------------------------真空按钮 start
+                                    case NCoilAdd447:{
+                                      
+                                              
+                                    }break;
+                                        
+                                    
+                                    //---------------------------------------------------------------Gross Product
+                                    case NCoilAdd440:{  //Output Count     清除产量计数按键         
+                                          Gross_Product_Counters=0;                                        
+                                          IIC_Write_4Byte(OperateAdd(ModbusRegAdd,SRegisAdd41),&Gross_Product_Counters);
+                                    }break; 
+                                    
+                          }  		
+                                     Coil.Add=0;
+                                     Coil.num=0;		
+              }                              
+              
+              //-----------------------------------------------------------------------------------------------
+              //动作要求
+              
+
+              
+
+            
+            OSTimeDlyHMSM( 0,        //周期性的调用AppTaskMotionControl
+                           0,
+                           0,
+                           1,
+                           OS_OPT_TIME_HMSM_STRICT,
+                           &err);         
+   }        
+}
+
+//掉电检测----保存数据
+void Protection_Data_Action(void){         
+
+  
+  
+}
+

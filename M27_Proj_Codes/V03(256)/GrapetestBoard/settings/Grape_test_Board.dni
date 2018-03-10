@@ -1,0 +1,191 @@
+[Stack]
+FillEnabled=0
+OverflowWarningsEnabled=1
+WarningThreshold=90
+SpWarningsEnabled=1
+WarnLogOnly=1
+UseTrigger=1
+TriggerName=main
+LimitSize=0
+ByteLimit=50
+[DebugChecksum]
+Checksum=-149717401
+[JLinkDriver]
+CStepIntDis=_ 0
+[Exceptions]
+StopOnUncaught=_ 0
+StopOnThrow=_ 0
+[SWOTraceHWSettings]
+OverrideDefaultClocks=0
+CpuClock=72000000
+ClockAutoDetect=0
+ClockWanted=2000000
+JtagSpeed=2000000
+Prescaler=36
+TimeStampPrescIndex=0
+TimeStampPrescData=0
+PcSampCYCTAP=1
+PcSampPOSTCNT=15
+PcSampIndex=0
+DataLogMode=0
+ITMportsEnable=0
+ITMportsTermIO=0
+ITMportsLogFile=0
+ITMlogFile=$PROJ_DIR$\ITM.log
+[CodeCoverage]
+Enabled=_ 0
+[CallStack]
+ShowArgs=0
+[Disassembly]
+MixedMode=1
+[Interrupts]
+Enabled=1
+[MemConfig]
+Base=1
+Manual=0
+Ddf=1
+TypeViol=0
+Stop=1
+[Simulator]
+Freq=10000000
+MultiCoreRunAll=1
+[array_types]
+Fmt0=CPU_INT08U[100]	4	0
+Fmt1=CPU_INT16S[200]	4	0
+Fmt2=CPU_INT32U[4]	4	0
+[watch_formats]
+Fmt0={W}0:ADC1_ConvertedValue	0	3
+Fmt1={W}0:ADC2_ConvertedValue	0	8
+Fmt2={W}0:AD_value	0	5
+Fmt3={W}0:Coil	0	7
+Fmt4={W}0:Input_mVValue	0	7
+Fmt5={W}0:Origin_steps	3	0
+Fmt6={W}0:Work_TD	0	7
+Fmt7={W}0:Work_TI	0	7
+Fmt8={W}0:receBuf	5	2
+Fmt9={W}0:sum1	4	0
+Fmt10={W}0:sum2	4	0
+Fmt11={W}0:sumttest	0	3
+[SWOTraceWindow]
+PcSampling=0
+InterruptLogs=0
+ForcedTimeStamps=0
+EventCPI=0
+EventEXC=0
+EventFOLD=0
+EventLSU=0
+EventSLEEP=0
+[PowerLog]
+LogEnabled=0
+GraphEnabled=0
+ShowTimeLog=1
+ShowTimeSum=0
+Title_0=I0
+Symbol_0=0 4 1
+LiveEnabled=0
+LiveFile=PowerLogLive.log
+[DataLog]
+LogEnabled=0
+SumEnabled=0
+GraphEnabled=0
+ShowTimeLog=1
+ShowTimeSum=1
+[EventLog]
+LogEnabled=0
+SumEnabled=0
+GraphEnabled=0
+ShowTimeLog=1
+ShowTimeSum=1
+SumSortOrder=0
+[InterruptLog]
+LogEnabled=0
+SumEnabled=0
+GraphEnabled=0
+ShowTimeLog=1
+ShowTimeSum=1
+SumSortOrder=0
+[Log file]
+LoggingEnabled=_ 0
+LogFile=_ ""
+Category=_ 0
+[TermIOLog]
+LoggingEnabled=_ 0
+LogFile=_ ""
+[CallStackLog]
+Enabled=0
+[PowerProbe]
+Frequency=10000
+Probe0=I0
+ProbeSetup0=2 1 1 2 0 0
+[DriverProfiling]
+Enabled=0
+Mode=3
+Graph=0
+Symbiont=0
+Exclusions=
+[Disassemble mode]
+mode=0
+[Breakpoints2]
+Bp0=_ 0 "EMUL_CODE" "{$PROJ_DIR$\uCOS-iii_Grape_Test_V01}.151.1" 0 0 1 "" 0 "" 0
+Bp1=_ 0 "EMUL_CODE" "{$PROJ_DIR$}.364.15" 0 0 1 "" 0 "" 0
+Bp2=_ 0 "EMUL_CODE" "{$PROJ_DIR$}.178.11" 0 0 1 "" 0 "" 0
+Bp3=_ 0 "EMUL_CODE" "{$PROJ_DIR$}.441.13" 0 0 1 "" 0 "" 0
+Bp4=_ 0 "EMUL_CODE" "{$PROJ_DIR$}.571.15" 0 0 1 "" 0 "" 0
+Bp5=_ 0 "EMUL_CODE" "0x08000158" 0 0 1 "" 0 "" 0
+Bp6=_ 0 "EMUL_CODE" "{$PROJ_DIR$}.391.18" 0 0 1 "" 0 "" 0
+Bp7=_ 1 "EMUL_CODE" "{$PROJ_DIR$\uCOS-iii_Grape_Test_V01\app.c}.1563.21" 0 0 1 "" 0 "" 0
+Count=8
+[Aliases]
+A0=_ "C:\Users\Administrator\Desktop\Programv05\GrapetestBoard\uCOS-iii_Grape_Test_V01\app.c" ""
+A1=_ "C:\Users\Administrator\Desktop\拆屏设备\下位机\HW1ME01538 7-13寸前壳不可见产品拆屏夹具(非标) 下位机 V03\GrapetestBoard\BSP\ST\STM32_Libraries\STM32F10x_StdPeriph_Driver_v3.5\src\stm32f10x_usart.c" ""
+A2=_ "C:\Users\Administrator\Desktop\程序文档(HW1TE00645V0528 1721)\程序文档(HW1TE00645V0528 1346)\GrapetestBoard\BSP\bsp_lcd1602.c" ""
+A3=_ "C:\Users\Administrator\Desktop\程序文档(HW1TE00645V0528 1721)\程序文档(HW1TE00645V0528 1346)\uC-CPU\ARM-Cortex-M3\IAR\cpu_c.c" ""
+A4=_ "C:\Users\Administrator\Desktop\程序文档(HW1TE00645V0528 1721)\程序文档(HW1TE00645V0528 1346)\uC-CPU\cpu_core.c" ""
+A5=_ "C:\Users\Administrator\Desktop\四合一程序(出货版本20160818)\程序文档(HW1TE00722 V01)\GrapetestBoard\uCOS-iii_Grape_Test_V01\app.c" ""
+A6=_ "C:\Users\SR001534\Desktop\Farada电池盖拆卸\farada电池拆卸_最新修正版本\uC-CPU\ARM-Cortex-M3\IAR\cpu_c.c" ""
+A7=_ "C:\Users\SR001534\Desktop\Farada电池盖拆卸\farada电池拆卸_最新修正版本\uCOS-III\Ports\ARM-Cortex-M3\Generic\IAR\os_cpu_c.c" ""
+A8=_ "C:\Users\SR001534\Desktop\Farada电池盖拆卸\farada电池拆卸_最新修正版本\uCOS-III\Source\os_core.c" ""
+A9=_ "C:\Users\SR001534\Desktop\Farada电池盖拆卸\farada电池拆卸_最新修正版本\uCOS-III\Source\os_task.c" ""
+A10=_ "C:\Users\SR001534\Desktop\Grape-Test\软件设计\uC-CPU\ARM-Cortex-M3\IAR\cpu_a.asm" ""
+A11=_ "C:\Users\SR001534\Desktop\Grape-Test\软件设计\uCOS-III\Ports\ARM-Cortex-M3\Generic\IAR\os_cpu_a.asm" ""
+A12=_ "C:\Users\SR001534\Desktop\HW1ME00925\BTB压合程序HW1ME00925\GrapetestBoard\uCOS-iii_Grape_Test_V01\app.c" ""
+A13=_ "C:\Users\SR001534\Desktop\HW1TE00645(一拖四)\程序文档(HW1TE00645)\GrapetestBoard\uCOS-iii_Grape_Test_V01\app.c" ""
+A14=_ "C:\Users\SR001534\Desktop\HW1TE00645(一拖四)\程序文档\GrapetestBoard\BSP\ST\STM32_Libraries\STM32F10x_StdPeriph_Driver_v3.5\src\misc.c" ""
+A15=_ "C:\Users\SR001534\Desktop\HW1TE00645(一拖四)\程序文档\GrapetestBoard\BSP\ST\STM32_Libraries\STM32F10x_StdPeriph_Driver_v3.5\src\stm32f10x_gpio.c" ""
+A16=_ "C:\Users\SR001534\Desktop\HW1TE00645(一拖四)\程序文档\GrapetestBoard\BSP\ST\STM32_Libraries\STM32F10x_StdPeriph_Driver_v3.5\src\stm32f10x_tim.c" ""
+A17=_ "C:\Users\SR001534\Desktop\HW1TE00645(一拖四)\程序文档\GrapetestBoard\BSP\ST\STM32_Libraries\STM32F10x_StdPeriph_Driver_v3.5\src\stm32f10x_usart.c" ""
+A18=_ "C:\Users\SR001534\Desktop\HW1TE00645(一拖四)\程序文档\uCOS-III\Source\os_core.c" ""
+A19=_ "C:\Users\SR001534\Desktop\Next_TP\Next_TP拆卸HMI\Programv04\uC-CPU\ARM-Cortex-M3\IAR\cpu_c.c" ""
+A20=_ "C:\Users\SR001534\Desktop\Next_TP\Next_TP拆卸HMI\Programv04\uC-CPU\cpu_core.c" ""
+A21=_ "C:\Users\SR001534\Desktop\Next_TP\Next_TP拆卸HMI\Programv04\uCOS-III\Ports\ARM-Cortex-M3\Generic\IAR\os_cpu_c.c" ""
+A22=_ "C:\Users\SR001534\Desktop\Next_TP\Next_TP拆卸HMI\Programv04\uCOS-III\Source\os_core.c" ""
+A23=_ "C:\Users\SR001534\Desktop\Next_TP\Next_TP拆卸HMI\Programv04\uCOS-III\Source\os_msg.c" ""
+A24=_ "C:\Users\SR001534\Desktop\Next_TP\Next_TP拆卸HMI\Programv04\uCOS-III\Source\os_tick.c" ""
+A25=_ "C:\Users\SR001534\Desktop\Next_TP\软件设计\Programv03\GrapetestBoard\uCOS-iii_Grape_Test_V01\app.c" ""
+A26=_ "C:\Users\SR001534\Desktop\Next_TP\软件设计\Programv03\uC-CPU\cpu_core.c" ""
+A27=_ "C:\Users\SR001534\Desktop\Next_TP\软件设计\Programv04\Programv04\GrapetestBoard\BSP\ST\STM32_Libraries\STM32F10x_StdPeriph_Driver_v3.5\src\stm32f10x_gpio.c" ""
+A28=_ "C:\Users\SR001534\Desktop\Next_TP\软件设计\Programv04\Programv04\GrapetestBoard\BSP\ST\STM32_Libraries\STM32F10x_StdPeriph_Driver_v3.5\src\stm32f10x_rcc.c" ""
+A29=_ "C:\Users\SR001534\Desktop\Next_TP\软件设计\Programv04\Programv04\GrapetestBoard\BSP\ST\STM32_Libraries\STM32F10x_StdPeriph_Driver_v3.5\src\stm32f10x_tim.c" ""
+A30=_ "C:\Users\SR001534\Desktop\Next_TP\软件设计\Programv04\Programv04\GrapetestBoard\BSP\ST\STM32_Libraries\STM32F10x_StdPeriph_Driver_v3.5\src\stm32f10x_usart.c" ""
+A31=_ "C:\Users\SR001534\Desktop\Next_TP\软件设计\Programv04\Programv04\uC-CPU\ARM-Cortex-M3\IAR\cpu_a.asm" ""
+A32=_ "C:\Users\SR001534\Desktop\Next_TP\软件设计\Programv04\Programv04\uCOS-III\Ports\ARM-Cortex-M3\Generic\IAR\os_cpu_a.asm" ""
+A33=_ "C:\Users\SR001534\Desktop\Next_TP拆卸HMI\Programv04\GrapetestBoard\BSP\modbus.c" ""
+A34=_ "C:\Users\SR001534\Desktop\Next_TP拆卸HMI\Programv04\GrapetestBoard\uCOS-iii_Grape_Test_V01\app.c" ""
+A35=_ "C:\Users\SR001534\Desktop\程序文档(HW1TE00645)\GrapetestBoard\BSP\bsp_lcd1602.c" ""
+A36=_ "C:\Users\SR001534\Desktop\程序文档(HW1TE00645V0528 1346)\GrapetestBoard\BSP\bsp_lcd1602.c" ""
+A37=_ "C:\Users\SR001534\Desktop\程序文档(HW1TE00645V0528 1735)\GrapetestBoard\BSP\bsp_lcd1602.c" ""
+A38=_ "C:\Users\SR001534\Desktop\程序文档(HW1TE00645V0602 0931)\程序文档(HW1TE00645V0528 1459)\GrapetestBoard\BSP\bsp_lcd1602.c" ""
+A39=_ "C:\Users\SR001534\Desktop\程序文档(HW1TE00645V0603 2133)\程序文档(HW1TE00645V0603 2133)\GrapetestBoard\BSP\bsp_lcd1602.c" ""
+A40=_ "C:\Users\SR001534\Desktop\程序文档(HW1TE00645V0604 1458)\GrapetestBoard\BSP\bsp_lcd1602.c" ""
+A41=_ "C:\Users\SR001534\Desktop\程序文档(HW1TE00645V0608 0902)\GrapetestBoard\BSP\bsp_lcd1602.c" ""
+A42=_ "C:\Users\SR00356\Desktop\拆屏设备\下位机\HW1ME01538 7-13寸前壳不可见产品拆屏夹具(非标) 下位机 V03\GrapetestBoard\uCOS-iii_Grape_Test_V01\app.c" ""
+A43=_ "C:\Users\SR00356\Desktop\下机位\Solftware Project\Venus Take Apart(V01版本20161101)\GrapetestBoard\uCOS-iii_Grape_Test_V01\app.c" ""
+A44=_ "E:\SRKJ\huawei\Takepart Fixture\HW1ME01538 7-13寸前壳不可见产品拆屏夹具(非标)（02430EHQ_001）\电子资料\程序\下机位\HW1ME01538 7-13寸前壳不可见产品拆屏夹具(非标) 下位机 V03\uCOS-III\Source\os_task.c" ""
+A45=_ "F:\刘勖\华为项目\项目资料\New Projects\四合一摄像头测试夹具\程序文档(HW1TE00645V0608 V02)\GrapetestBoard\BSP\bsp_int.c" ""
+A46=_ "F:\刘勖\华为项目\项目资料\New Projects\四合一摄像头测试夹具\程序文档(HW1TE00645V0608 V02)\GrapetestBoard\BSP\uCOS-III\bsp_os.c" ""
+A47=_ "F:\刘勖\华为项目\项目资料\New Projects\四合一摄像头测试夹具\程序文档(HW1TE00645V0608 V02)\GrapetestBoard\uCOS-iii_Grape_Test_V01\app.c" ""
+A48=_ "F:\刘勖\华为项目\项目资料\New Projects\四合一摄像头测试夹具\程序文档(HW1TE00645V0608 V02)\uC-CPU\ARM-Cortex-M3\IAR\cpu_c.c" ""
+A49=_ "F:\刘勖\华为项目\项目资料\New Projects\四合一摄像头测试夹具\程序文档(HW1TE00645V0608 V02)\uCOS-III\Source\os_core.c" ""
+A50=_ "F:\刘勖\华为项目\项目资料\New Projects\四合一摄像头测试夹具\程序文档(HW1TE00722 V01)\GrapetestBoard\uCOS-iii_Grape_Test_V01\app.c" ""
+Count=51
+SuppressDialog=1

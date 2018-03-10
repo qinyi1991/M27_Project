@@ -1,0 +1,103 @@
+/* -------------------- GPIOA PINS -------------------- */
+#define  BSP_ADC1                                DEF_BIT_00
+#define  BSP_ADC2                                DEF_BIT_01
+
+#define  BSP_TXD2                                DEF_BIT_02
+#define  BSP_RXD2                                DEF_BIT_03
+
+#define  BSP_SPI1_NSS                            DEF_BIT_04
+
+#define  BSP_GPIOA_IN6                           DEF_BIT_05
+
+#define  BSP_PWM_TM3_CH1                         DEF_BIT_06
+
+#define  BSP_GPIOA_PIN07                         DEF_BIT_07
+#define  BSP_GPIOA_PIN08                         DEF_BIT_08     
+#define  BSP_GPIOA_PIN09                         DEF_BIT_09
+#define  BSP_GPIOA_PIN10                         DEF_BIT_10
+#define  BSP_GPIOA_PIN11                         DEF_BIT_11    //Y1
+#define  BSP_GPIOA_PIN12                         DEF_BIT_12
+
+#define  BSP_GPIOA_TMS_SWDIO                     DEF_BIT_13    //SWD
+#define  BSP_GPIOA_TCK_SWCLK                     DEF_BIT_14
+#define  BSP_GPIOA_TDI                           DEF_BIT_15
+
+
+/* -------------------- GPIOB PINS -------------------- */
+#define  BSP_OT01                                DEF_BIT_00
+#define  BSP_OT02                                DEF_BIT_01
+#define  BSP_OT04                                DEF_BIT_02
+
+#define  BSP_GPIOB_PIN03                         DEF_BIT_03
+#define  BSP_GPIOB_PIN04                         DEF_BIT_04
+
+#define  BSP_SPI1_MOSI                           DEF_BIT_05
+
+#define  BSP_GPIOB_PIN06                         DEF_BIT_06
+#define  BSP_GPIOB_PIN07                         DEF_BIT_07
+
+#define  BSP_PWM2                                DEF_BIT_08  
+
+#define  BSP_IN04                                DEF_BIT_09
+
+#define  BSP_GPIOB_PIN_10                        DEF_BIT_10
+#define  BSP_GPIOB_PIN_11                        DEF_BIT_11
+#define  BSP_GPIOB_PIN_12                        DEF_BIT_12
+#define  BSP_GPIOB_PIN_13                        DEF_BIT_13
+#define  BSP_GPIOB_PIN_14                        DEF_BIT_14
+#define  BSP_GPIOB_PIN_15                        DEF_BIT_15
+
+/* -------------------- GPIOC PINS -------------------- */
+#define  BSP_GPIOC_PIN_00                        DEF_BIT_00 //ADC10
+#define  BSP_GPIOC_PIN_01                        DEF_BIT_01 //ADC11
+#define  BSP_GPIOC_PIN_02                        DEF_BIT_02 //ADC12
+#define  BSP_GPIOC_PIN_03                        DEF_BIT_03 //ADC13
+#define  BSP_GPIOC_PIN_04                        DEF_BIT_04 //ADC14
+#define  BSP_GPIOC_PIN_05                        DEF_BIT_05 //ADC15
+
+#define  BSP_IN20                                DEF_BIT_06
+#define  BSP_GPIOC_PIN_07                        DEF_BIT_07
+#define  BSP_GPIOC_PIN_08                        DEF_BIT_08
+#define  BSP_GPIOC_PIN_09                        DEF_BIT_09    
+#define  BSP_GPIOC_PIN_10                        DEF_BIT_10
+#define  BSP_GPIOC_PIN_11                        DEF_BIT_11
+#define  BSP_GPIOC_PIN_12                        DEF_BIT_12
+#define  BSP_GPIOC_PIN_13                        DEF_BIT_13
+
+/* -------------------- GPIOD PINS -------------------- */
+#define  BSP_IN19                                DEF_BIT_00
+#define  BSP_IN18                                DEF_BIT_01
+#define  BSP_PD2_CMD                             DEF_BIT_02
+#define  BSP_IN17                                DEF_BIT_03
+#define  BSP_IN08                                DEF_BIT_04
+#define  BSP_IN07                                DEF_BIT_05
+#define  BSP_IN06                                DEF_BIT_06
+#define  BSP_IN05                                DEF_BIT_07
+#define  BSP_IN16                                DEF_BIT_08
+#define  BSP_IN15                                DEF_BIT_09
+#define  BSP_IN14                                DEF_BIT_10
+#define  BSP_IN13                                DEF_BIT_11
+#define  BSP_IN12                                DEF_BIT_12
+#define  BSP_IN11                                DEF_BIT_13
+#define  BSP_IN10                                DEF_BIT_14
+#define  BSP_IN09                                DEF_BIT_15
+
+/* -------------------- GPIOE PINS -------------------- */
+#define  BSP_IN03                                DEF_BIT_00
+#define  BSP_IN02                                DEF_BIT_01
+#define  BSP_IN01                                DEF_BIT_02
+#define  BSP_IN21                                DEF_BIT_03
+#define  BSP_IN22                                DEF_BIT_04
+
+#define  BSP_OT21                                DEF_BIT_05  //PWM2电机方向
+#define  BSP_OT20                                DEF_BIT_06  //PWM1电机方向
+
+#define  BSP_OT03                                DEF_BIT_07
+#define  BSP_OT06                                DEF_BIT_08
+#define  BSP_OT05                                DEF_BIT_09
+#define  BSP_OT08                                DEF_BIT_10
+#define  BSP_OT07                                DEF_BIT_11
+#define  BSP_OT10                                DEF_BIT_12
+#define  BSP_OT09                                DEF_BIT_13
+#define  BSP_OT12                                DEF_BIT_14
+#define  BSP_OT11                                DEF_BIT_15
